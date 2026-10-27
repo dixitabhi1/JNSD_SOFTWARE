@@ -15,6 +15,7 @@ import {
   KeyRound,
   CheckCircle2,
 } from 'lucide-react';
+import { SchoolLogo } from './SchoolLogo';
 
 export const LoginPage: React.FC = () => {
   const { login, loginAsDemo } = useAuth();
@@ -52,8 +53,8 @@ export const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         {/* School Crest */}
-        <div className="inline-flex p-3 bg-white rounded-2xl shadow-md border border-slate-200 mb-3">
-          <img src="/school-logo.png" alt="JNSD Education Centre Logo" className="w-16 h-16 object-contain" />
+        <div className="inline-flex p-3 bg-white rounded-2xl shadow-lg border border-amber-300/60 mb-3 ring-4 ring-amber-500/10">
+          <SchoolLogo className="w-20 h-20 object-contain drop-shadow" />
         </div>
 
         <h1 className="text-2xl font-black text-school-900 tracking-tight">JNSD EDUCATION CENTRE</h1>

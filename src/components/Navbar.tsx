@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Shield, UserCheck, AlertTriangle, LogOut, Smartphone, RefreshCw } from 'lucide-react';
 import { UserRole } from '../types';
+import { SchoolLogo } from './SchoolLogo';
 
 interface NavbarProps {
   onOpenUpdates: () => void;
@@ -15,13 +16,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenUpdates }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand & Crest */}
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-white border border-school-600 flex items-center justify-center p-0.5 shadow-inner overflow-hidden">
-            <img src="/school-logo.png" alt="JNSD School Logo" className="w-full h-full object-contain" />
+          <div className="w-11 h-11 rounded-xl bg-white p-1 shadow-md border border-amber-400/50 flex items-center justify-center shrink-0 ring-2 ring-school-950/20 overflow-hidden">
+            <SchoolLogo className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-lg tracking-wide text-white">JNSD EDUCATION CENTRE</span>
-              <span className="hidden sm:inline-block text-xs bg-school-800 text-school-200 px-2 py-0.5 rounded border border-school-700">
+              <span className="font-extrabold text-lg tracking-wide text-white">JNSD EDUCATION CENTRE</span>
+              <span className="hidden sm:inline-block text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-medium border border-amber-500/30">
                 Session 2026–27
               </span>
             </div>
