@@ -1,23 +1,20 @@
 {
-  "version": "1.1.0",
-  "versionCode": 2,
+  "version": "1.2.0",
+  "versionCode": 3,
   "minSupportedVersion": "1.0.0",
   "releaseDate": "2026-10-27",
   "releaseChannel": "production",
-  "downloadUrl": "https://github.com/dixitabhi1/JNSD_SOFTWARE/releases/download/v1.1.0/app-debug.apk",
-  "apkChecksumSha256": "4b5d278077c44df656a8d6e326462fa1e1ecaa5df1b91ebfa2354c0e68784d12",
+  "downloadUrl": "https://github.com/dixitabhi1/JNSD_SOFTWARE/releases/download/v1.2.0/JNSD_School_ERP_v1.2.0_debug.apk",
   "packageId": "com.jnsd.schoolerp",
   "isRequired": false,
   "releaseNotes": [
-    "Production Release v1.1.0 of JNSD Education Centre School ERP.",
-    "Official School Crest integrated across Navbar, Login, Receipts, and CBSE Report Cards.",
+    "Production Release v1.2.0 - Complete Mobile-First Optimization.",
+    "Integrated safe-area inset top/bottom padding to eliminate status bar and notch collision on Android.",
+    "Responsive Slide-Over Navigation Drawer with quick touch close, school header, and mobile role switcher.",
+    "Bottom Navigation Bar for instant thumb-friendly access to Home, Students, Fees/Attendance, Exams, and More.",
+    "Full-width fluid responsive layouts for mobile phone screens with horizontal swipeable sub-tabs.",
     "Manager Sir (Lalitesh Kumar Dixit) and Principal (Ram Jiyawan Yadav) two-tier fee approval workflow.",
-    "Interactive Fee Calculator & Estimator with custom concession policies and parent quotation sharing.",
-    "Class-wise Fee Structure Management for Tuition, Admission, Annual, Computer, and Sports fees.",
-    "Student admission wizard with Aadhaar and Birth Certificate OCR verification.",
-    "Daily class attendance registers with low attendance alert triggers (<75%).",
-    "CBSE 8-point grading examinations ledger with printable Progress Report Cards.",
-    "Receipt OCR reconciliation with automated ledger verification.",
-    "Ministry of Education UDISE+ validation rules engine and JSON/CSV exports."
+    "Interactive Fee Calculator with Sibling, EWS, and Staff concessions plus quotation sharing.",
+    "Dynamic class-wise Fee Structure Management for Pre-Primary through Class 8."
   ]
 }

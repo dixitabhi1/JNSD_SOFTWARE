@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 
 export const AppUpdatesModule: React.FC = () => {
-  const currentInstalledVersion = '1.0.0';
-  const currentVersionCode = 1;
+  const currentInstalledVersion = '1.2.0';
+  const currentVersionCode = 3;
 
   const [manifest, setManifest] = useState<AppVersionManifest | null>(null);
   const [isChecking, setIsChecking] = useState(false);

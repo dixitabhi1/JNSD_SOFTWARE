@@ -320,7 +320,7 @@ Affiliation: CBSE-AFF-JNSD-0921 | Session 2026-27`;
       </div>
 
       {/* Financial Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
           <div>
             <span className="text-xs text-slate-500 font-semibold uppercase">Total Fee Collected</span>
@@ -381,10 +381,10 @@ Affiliation: CBSE-AFF-JNSD-0921 | Session 2026-27`;
       </div>
 
       {/* Module Sub-Navigation Tabs */}
-      <div className="flex border-b border-slate-200 space-x-2 text-sm font-semibold">
+      <div className="flex border-b border-slate-200 space-x-2 text-xs sm:text-sm font-semibold overflow-x-auto no-scrollbar flex-nowrap pb-0.5">
         <button
           onClick={() => setActiveSubTab('invoices')}
-          className={`pb-2.5 px-3 border-b-2 flex items-center space-x-1.5 transition ${
+          className={`pb-2.5 px-3 border-b-2 flex items-center space-x-1.5 shrink-0 whitespace-nowrap transition ${
             activeSubTab === 'invoices'
               ? 'border-school-900 text-school-900 font-bold'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -396,7 +396,7 @@ Affiliation: CBSE-AFF-JNSD-0921 | Session 2026-27`;
 
         <button
           onClick={() => setActiveSubTab('pending')}
-          className={`pb-2.5 px-3 border-b-2 flex items-center space-x-1.5 transition ${
+          className={`pb-2.5 px-3 border-b-2 flex items-center space-x-1.5 shrink-0 whitespace-nowrap transition ${
             activeSubTab === 'pending'
               ? 'border-school-900 text-school-900 font-bold'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -413,7 +413,7 @@ Affiliation: CBSE-AFF-JNSD-0921 | Session 2026-27`;
 
         <button
           onClick={() => setActiveSubTab('structures')}
-          className={`pb-2.5 px-3 border-b-2 flex items-center space-x-1.5 transition ${
+          className={`pb-2.5 px-3 border-b-2 flex items-center space-x-1.5 shrink-0 whitespace-nowrap transition ${
             activeSubTab === 'structures'
               ? 'border-school-900 text-school-900 font-bold'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -425,7 +425,7 @@ Affiliation: CBSE-AFF-JNSD-0921 | Session 2026-27`;
 
         <button
           onClick={() => setActiveSubTab('calculator')}
-          className={`pb-2.5 px-3 border-b-2 flex items-center space-x-1.5 transition ${
+          className={`pb-2.5 px-3 border-b-2 flex items-center space-x-1.5 shrink-0 whitespace-nowrap transition ${
             activeSubTab === 'calculator'
               ? 'border-school-900 text-school-900 font-bold'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -725,6 +725,7 @@ Affiliation: CBSE-AFF-JNSD-0921 | Session 2026-27`;
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
                 <tr>
@@ -760,6 +761,7 @@ Affiliation: CBSE-AFF-JNSD-0921 | Session 2026-27`;
               </tbody>
             </table>
           </div>
+        </div>
         </div>
       )}
 
@@ -1341,7 +1343,7 @@ Affiliation: CBSE-AFF-JNSD-0921 | Session 2026-27`;
                 </div>
               </div>
 
-              <div>
+              <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border border-slate-200">
                   <thead className="bg-slate-100 font-semibold text-slate-700">
                     <tr>

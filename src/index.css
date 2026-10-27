@@ -7,11 +7,16 @@
     --brand-navy: #0f294a;
     --brand-blue: #1e4976;
     --brand-teal: #0d9488;
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
   }
 
   body {
     @apply bg-slate-50 text-slate-900;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Modern Web Guidance: overscroll-behavior containment for modal dialogs */
@@ -24,6 +29,20 @@
     background-color: rgba(15, 23, 42, 0.5);
     backdrop-filter: blur(2px);
   }
+}
+
+/* Safe-area insets for mobile notches, punch-holes, and gesture bars */
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 0px);
+}
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
+}
+.pl-safe {
+  padding-left: max(env(safe-area-inset-left, 0px), 0px);
+}
+.pr-safe {
+  padding-right: max(env(safe-area-inset-right, 0px), 0px);
 }
 
 /* Custom scrollbars for data tables and sidebars */
@@ -42,6 +61,15 @@
   background: #94a3b8;
 }
 
+/* Hide scrollbars on mobile tab carousels while keeping touch-swipe active */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Print utilities for official Receipts, Report Cards & Admission Forms */
 @media print {
   .no-print {
@@ -57,8 +85,5 @@
   }
   .page-break {
     page-break-after: always;
-  }
-  header, nav, aside {
-    display: none !important;
   }
 }
