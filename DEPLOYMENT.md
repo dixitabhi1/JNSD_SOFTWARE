@@ -95,3 +95,4 @@ If an update introduces unexpected behavior:
 1. **Web:** Roll back the web hosting deployment to the previous immutable release commit immediately.
 2. **Database:** If a migration was applied, evaluate backward compatibility. Do not roll back migrations if new data was written; apply a forward-fixing migration instead.
 3. **Android APK:** Notify users via the In-App Update screen that a patch update is in progress. The application manifest allows forcing or revoking specific versions.
+

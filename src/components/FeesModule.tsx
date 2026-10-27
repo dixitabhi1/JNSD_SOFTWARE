@@ -467,3 +467,4 @@ export const FeesModule: React.FC = () => {
     </div>
   );
 };
+

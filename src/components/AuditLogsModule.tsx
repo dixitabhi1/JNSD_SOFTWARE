@@ -120,3 +120,4 @@ export const AuditLogsModule: React.FC = () => {
     </div>
   );
 };
+

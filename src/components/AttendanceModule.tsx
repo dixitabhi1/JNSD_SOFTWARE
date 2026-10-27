@@ -280,3 +280,4 @@ export const AttendanceModule: React.FC = () => {
     </div>
   );
 };
+

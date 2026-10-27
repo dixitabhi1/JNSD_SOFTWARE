@@ -39,3 +39,4 @@ jobs:
           name: jnsd-web-dist
           path: dist/
           retention-days: 14
+

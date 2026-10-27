@@ -208,3 +208,4 @@ export const AppUpdatesModule: React.FC = () => {
     </div>
   );
 };
+

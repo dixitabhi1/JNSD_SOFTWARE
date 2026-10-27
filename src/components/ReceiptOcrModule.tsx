@@ -389,3 +389,4 @@ export const ReceiptOcrModule: React.FC = () => {
     </div>
   );
 };
+
