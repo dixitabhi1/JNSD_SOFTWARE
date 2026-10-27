@@ -5,7 +5,7 @@ import { AlertOctagon, Lock } from 'lucide-react';
 export const RevokedBanner: React.FC = () => {
   const { currentUser, isRevoked } = useAuth();
 
-  if (!isRevoked) return null;
+  if (!isRevoked || !currentUser) return null;
 
   return (
     <div className="bg-rose-50 border-b-2 border-rose-500 p-4 shadow-sm">

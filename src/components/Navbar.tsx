@@ -8,7 +8,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenUpdates }) => {
-  const { currentUser, switchUser, isRevoked } = useAuth();
+  const { currentUser, switchUser, isRevoked, logout } = useAuth();
 
   return (
     <header className="bg-school-900 text-white shadow-md border-b border-school-800 sticky top-0 z-30">
@@ -35,12 +35,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenUpdates }) => {
           <div className="hidden md:flex items-center space-x-1 bg-school-950 p-1 rounded-lg border border-school-800 text-xs">
             <span className="text-slate-400 px-2 flex items-center space-x-1">
               <RefreshCw className="w-3 h-3" />
-              <span>Simulate Role:</span>
+              <span>Role:</span>
             </span>
             <button
               onClick={() => switchUser('MANAGER')}
               className={`px-2.5 py-1 rounded font-medium transition ${
-                currentUser.role === 'MANAGER' && !isRevoked
+                currentUser?.role === 'MANAGER' && !isRevoked
                   ? 'bg-amber-600 text-white shadow'
                   : 'text-slate-300 hover:text-white hover:bg-school-800'
               }`}
@@ -50,7 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenUpdates }) => {
             <button
               onClick={() => switchUser('PRINCIPAL')}
               className={`px-2.5 py-1 rounded font-medium transition ${
-                currentUser.role === 'PRINCIPAL' && !isRevoked
+                currentUser?.role === 'PRINCIPAL' && !isRevoked
                   ? 'bg-indigo-600 text-white shadow'
                   : 'text-slate-300 hover:text-white hover:bg-school-800'
               }`}
@@ -60,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenUpdates }) => {
             <button
               onClick={() => switchUser('TEACHER')}
               className={`px-2.5 py-1 rounded font-medium transition ${
-                currentUser.role === 'TEACHER' && !isRevoked
+                currentUser?.role === 'TEACHER' && !isRevoked
                   ? 'bg-teal-600 text-white shadow'
                   : 'text-slate-300 hover:text-white hover:bg-school-800'
               }`}
@@ -91,16 +91,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenUpdates }) => {
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           </button>
 
-          {/* Current User Card */}
+          {/* Current User Card & Sign Out */}
           <div className="flex items-center space-x-2 pl-2 border-l border-school-800">
             <div className="w-8 h-8 rounded-full bg-school-800 border border-school-600 flex items-center justify-center font-bold text-xs text-school-200">
-              {currentUser.fullName.charAt(0)}
+              {currentUser?.fullName ? currentUser.fullName.charAt(0) : 'U'}
             </div>
             <div className="hidden lg:block text-left text-xs">
               <div className="font-semibold text-white leading-tight flex items-center space-x-1">
-                <span>{currentUser.fullName}</span>
-                {currentUser.role === 'MANAGER' && <Shield className="w-3 h-3 text-amber-400" />}
-                {currentUser.role === 'PRINCIPAL' && <UserCheck className="w-3 h-3 text-indigo-400" />}
+                <span>{currentUser?.fullName}</span>
+                {currentUser?.role === 'MANAGER' && <Shield className="w-3 h-3 text-amber-400" />}
+                {currentUser?.role === 'PRINCIPAL' && <UserCheck className="w-3 h-3 text-indigo-400" />}
               </div>
               <div className="text-school-300 flex items-center space-x-1">
                 {isRevoked ? (
@@ -109,10 +109,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenUpdates }) => {
                     <span>REVOKED</span>
                   </span>
                 ) : (
-                  <span>{currentUser.role}</span>
+                  <span>{currentUser?.role}</span>
                 )}
               </div>
             </div>
+
+            {/* Logout button */}
+            <button
+              onClick={logout}
+              className="p-1.5 rounded-lg bg-school-800 hover:bg-rose-900/80 text-school-300 hover:text-white transition ml-1"
+              title="Sign Out of Account"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>

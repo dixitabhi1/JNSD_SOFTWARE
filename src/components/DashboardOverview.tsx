@@ -54,7 +54,7 @@ export const DashboardOverview: React.FC<DashboardProps> = ({ onNavigate }) => {
             </span>
             <span className="text-xs text-school-300">Kanpur, Uttar Pradesh</span>
           </div>
-          <h1 className="text-2xl font-bold mt-1">Welcome, {currentUser.fullName}</h1>
+          <h1 className="text-2xl font-bold mt-1">Welcome, {currentUser?.fullName || "User"}</h1>
           <p className="text-school-200 text-sm mt-0.5">
             {isManager && 'Manager Dashboard — Full administrative, financial & oversight privileges.'}
             {isPrincipal && 'Principal Dashboard — Admissions, teachers & academic supervision.'}

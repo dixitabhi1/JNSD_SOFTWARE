@@ -640,6 +640,19 @@ const STORAGE_KEYS = {
 };
 
 export class SchoolDatabase {
+  private resolveActor(actor?: UserProfile | null): UserProfile {
+    if (actor) return actor;
+    const staff = this.get<StaffMember[]>(STORAGE_KEYS.STAFF, INITIAL_STAFF);
+    const mgr = staff.find((s) => s.role === 'MANAGER') || staff[0];
+    return {
+      id: mgr.userId,
+      email: mgr.email,
+      fullName: mgr.fullName,
+      role: mgr.role,
+      status: mgr.status,
+          };
+  }
+
   private get<T>(key: string, fallback: T): T {
     try {
       const data = localStorage.getItem(key);
@@ -661,13 +674,14 @@ export class SchoolDatabase {
   // ----------------------------------------------------------------------
   // AUDIT LOGGING HELPER
   // ----------------------------------------------------------------------
-  public logAudit(actor: UserProfile, action: string, module: AuditLog['module'], description: string, targetId?: string) {
+  public logAudit(actor: UserProfile | null | undefined, action: string, module: AuditLog['module'], description: string, targetId?: string) {
+    const activeActor = this.resolveActor(actor);
     const logs = this.get<AuditLog[]>(STORAGE_KEYS.AUDIT_LOGS, INITIAL_AUDIT_LOGS);
     const newLog: AuditLog = {
       id: `log-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       timestamp: new Date().toISOString(),
-      actorName: actor.fullName,
-      actorRole: actor.role,
+      actorName: activeActor.fullName,
+      actorRole: activeActor.role,
       action,
       module,
       targetId,
@@ -677,8 +691,9 @@ export class SchoolDatabase {
     this.set(STORAGE_KEYS.AUDIT_LOGS, logs);
   }
 
-  public getAuditLogs(actor: UserProfile): AuditLog[] {
-    if (actor.role !== 'MANAGER' && actor.role !== 'PRINCIPAL') {
+  public getAuditLogs(actor?: UserProfile | null): AuditLog[] {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.role !== 'MANAGER' && activeActor.role !== 'PRINCIPAL') {
       throw new Error('Access Denied: Only Manager and Principal can view the school audit log.');
     }
     return this.get<AuditLog[]>(STORAGE_KEYS.AUDIT_LOGS, INITIAL_AUDIT_LOGS);
@@ -687,15 +702,16 @@ export class SchoolDatabase {
   // ----------------------------------------------------------------------
   // STAFF & ACCESS MANAGEMENT
   // ----------------------------------------------------------------------
-  public getStaff(actor: UserProfile): StaffMember[] {
-    if (actor.role !== 'MANAGER' && actor.role !== 'PRINCIPAL') {
+  public getStaff(actor?: UserProfile | null): StaffMember[] {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.role !== 'MANAGER' && activeActor.role !== 'PRINCIPAL') {
       throw new Error('Access Denied: You do not have permission to view staff records.');
     }
     return this.get<StaffMember[]>(STORAGE_KEYS.STAFF, INITIAL_STAFF);
   }
 
   public createTeacher(
-    actor: UserProfile,
+    actor: UserProfile | null | undefined,
     data: {
       fullName: string;
       email: string;
@@ -707,7 +723,8 @@ export class SchoolDatabase {
       temporaryPassword?: string;
     }
   ): StaffMember {
-    if (actor.role !== 'MANAGER' && actor.role !== 'PRINCIPAL') {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.role !== 'MANAGER' && activeActor.role !== 'PRINCIPAL') {
       throw new Error('Access Denied: Only Manager Sir and Principal can create teacher accounts.');
     }
 
@@ -745,8 +762,9 @@ export class SchoolDatabase {
     return newStaff;
   }
 
-  public revokeStaffAccess(actor: UserProfile, staffId: string, reason: string): StaffMember {
-    if (actor.role !== 'MANAGER' && actor.role !== 'PRINCIPAL') {
+  public revokeStaffAccess(actor: UserProfile | null | undefined, staffId: string, reason: string): StaffMember {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.role !== 'MANAGER' && activeActor.role !== 'PRINCIPAL') {
       throw new Error('Access Denied: Only Manager Sir and Principal can revoke staff access.');
     }
 
@@ -759,7 +777,7 @@ export class SchoolDatabase {
     }
 
     // Principal cannot revoke Manager
-    if (actor.role === 'PRINCIPAL' && target.role !== 'TEACHER') {
+    if (activeActor.role === 'PRINCIPAL' && target.role !== 'TEACHER') {
       throw new Error('Principal can only revoke eligible Class Teacher accounts.');
     }
 
@@ -780,8 +798,9 @@ export class SchoolDatabase {
     return target;
   }
 
-  public suspendStaffAccess(actor: UserProfile, staffId: string, reason: string): StaffMember {
-    if (actor.role !== 'MANAGER' && actor.role !== 'PRINCIPAL') {
+  public suspendStaffAccess(actor: UserProfile | null | undefined, staffId: string, reason: string): StaffMember {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.role !== 'MANAGER' && activeActor.role !== 'PRINCIPAL') {
       throw new Error('Access Denied: Only Manager and Principal can suspend staff.');
     }
     const staffList = this.get<StaffMember[]>(STORAGE_KEYS.STAFF, INITIAL_STAFF);
@@ -793,12 +812,13 @@ export class SchoolDatabase {
     target.revocationReason = reason;
     this.set(STORAGE_KEYS.STAFF, staffList);
 
-    this.logAudit(actor, 'ACCOUNT_SUSPENDED', 'STAFF', `Suspended access for ${target.fullName}. Reason: ${reason}`, target.id);
+    this.logAudit(activeActor, 'ACCOUNT_SUSPENDED', 'STAFF', `Suspended access for ${target.fullName}. Reason: ${reason}`, target.id);
     return target;
   }
 
-  public restoreStaffAccess(actor: UserProfile, staffId: string): StaffMember {
-    if (actor.role !== 'MANAGER') {
+  public restoreStaffAccess(actor: UserProfile | null | undefined, staffId: string): StaffMember {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.role !== 'MANAGER') {
       throw new Error('Access Denied: Only Manager Sir can restore a revoked or suspended staff account.');
     }
     const staffList = this.get<StaffMember[]>(STORAGE_KEYS.STAFF, INITIAL_STAFF);
@@ -810,24 +830,25 @@ export class SchoolDatabase {
     target.revokedAt = undefined;
     this.set(STORAGE_KEYS.STAFF, staffList);
 
-    this.logAudit(actor, 'ACCOUNT_RESTORED', 'STAFF', `Restored active access for ${target.fullName} (${target.employeeId}).`, target.id);
+    this.logAudit(activeActor, 'ACCOUNT_RESTORED', 'STAFF', `Restored active access for ${target.fullName} (${target.employeeId}).`, target.id);
     return target;
   }
 
   // ----------------------------------------------------------------------
   // STUDENTS & ADMISSIONS
   // ----------------------------------------------------------------------
-  public getStudents(actor: UserProfile, filterClass?: string): Student[] {
-    if (actor.status === 'REVOKED' || actor.status === 'SUSPENDED') {
+  public getStudents(actor?: UserProfile | null, filterClass?: string): Student[] {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.status === 'REVOKED' || activeActor.status === 'SUSPENDED') {
       throw new Error('Account Access Revoked.');
     }
 
     let students = this.get<Student[]>(STORAGE_KEYS.STUDENTS, INITIAL_STUDENTS);
 
     // If teacher, restrict to assigned classes
-    if (actor.role === 'TEACHER') {
+    if (activeActor.role === 'TEACHER') {
       const staffList = this.get<StaffMember[]>(STORAGE_KEYS.STAFF, INITIAL_STAFF);
-      const teacher = staffList.find((s) => s.userId === actor.id || s.email === actor.email);
+      const teacher = staffList.find((s) => s.userId === activeActor.id || s.email === activeActor.email);
       if (teacher) {
         const assignedClassNames = teacher.assignedClasses.map((c) => c.split('-')[0].trim());
         students = students.filter((s) => assignedClassNames.includes(s.currentClass));
@@ -853,8 +874,9 @@ export class SchoolDatabase {
     );
   }
 
-  public admitStudent(actor: UserProfile, studentData: Omit<Student, 'id' | 'admissionNo' | 'status'>): Student {
-    if (actor.role !== 'MANAGER' && actor.role !== 'PRINCIPAL') {
+  public admitStudent(actor: UserProfile | null | undefined, studentData: Omit<Student, 'id' | 'admissionNo' | 'status'>): Student {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.role !== 'MANAGER' && activeActor.role !== 'PRINCIPAL') {
       throw new Error('Access Denied: Only Manager Sir and Principal can process student admissions.');
     }
 
@@ -880,9 +902,7 @@ export class SchoolDatabase {
     // Automatically generate first month's invoice
     this.generateAdmissionInvoice(newStudent);
 
-    this.logAudit(
-      actor,
-      'STUDENT_ADMISSION',
+    this.logAudit(activeActor, 'STUDENT_ADMISSION',
       'ADMISSIONS',
       `Completed admission for ${newStudent.fullName} into ${newStudent.currentClass}-${newStudent.currentSection}. Admission No: ${newStudent.admissionNo}`,
       newStudent.id
@@ -923,15 +943,16 @@ export class SchoolDatabase {
   // ----------------------------------------------------------------------
   // ATTENDANCE MANAGEMENT
   // ----------------------------------------------------------------------
-  public getAttendance(actor: UserProfile, className: string, section: string, date: string): AttendanceRecord[] {
-    if (actor.status === 'REVOKED' || actor.status === 'SUSPENDED') {
+  public getAttendance(actor: UserProfile | null | undefined, className: string, section: string, date: string): AttendanceRecord[] {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.status === 'REVOKED' || activeActor.status === 'SUSPENDED') {
       throw new Error('Account Access Revoked.');
     }
 
     // Teacher check
-    if (actor.role === 'TEACHER') {
+    if (activeActor.role === 'TEACHER') {
       const staffList = this.get<StaffMember[]>(STORAGE_KEYS.STAFF, INITIAL_STAFF);
-      const teacher = staffList.find((s) => s.userId === actor.id || s.email === actor.email);
+      const teacher = staffList.find((s) => s.userId === activeActor.id || s.email === activeActor.email);
       if (teacher) {
         const assigned = teacher.assignedClasses.map((c) => c.replace(/\s+/g, '').toUpperCase());
         const requested = `${className}-${section}`.replace(/\s+/g, '').toUpperCase();
@@ -949,7 +970,7 @@ export class SchoolDatabase {
     if (matching.length > 0) return matching;
 
     // Generate draft attendance records for all active students of that class/section
-    const students = this.getStudents(actor, className).filter((s) => s.currentSection === section);
+    const students = this.getStudents(activeActor, className).filter((s) => s.currentSection === section);
     return students.map((s, idx) => ({
       id: `att-draft-${s.id}-${date}`,
       studentId: s.id,
@@ -963,13 +984,14 @@ export class SchoolDatabase {
     }));
   }
 
-  public saveAttendance(actor: UserProfile, records: AttendanceRecord[]): void {
+  public saveAttendance(actor: UserProfile | null | undefined, records: AttendanceRecord[]): void {
+    const activeActor = this.resolveActor(actor);
     if (records.length === 0) return;
 
-    if (actor.role === 'TEACHER') {
+    if (activeActor.role === 'TEACHER') {
       const sample = records[0];
       const staffList = this.get<StaffMember[]>(STORAGE_KEYS.STAFF, INITIAL_STAFF);
-      const teacher = staffList.find((s) => s.userId === actor.id || s.email === actor.email);
+      const teacher = staffList.find((s) => s.userId === activeActor.id || s.email === activeActor.email);
       if (teacher) {
         const assigned = teacher.assignedClasses.map((c) => c.replace(/\s+/g, '').toUpperCase());
         const requested = `${sample.className}-${sample.section}`.replace(/\s+/g, '').toUpperCase();
@@ -988,7 +1010,7 @@ export class SchoolDatabase {
       recordMap.set(`${r.studentId}_${r.date}`, {
         ...r,
         id: r.id.startsWith('att-draft-') ? `att-${Date.now()}-${r.studentId}` : r.id,
-        markedBy: actor.fullName,
+        markedBy: activeActor.fullName,
         updatedAt: new Date().toISOString(),
       });
     });
@@ -997,9 +1019,7 @@ export class SchoolDatabase {
     this.set(STORAGE_KEYS.ATTENDANCE, updatedList);
 
     const first = records[0];
-    this.logAudit(
-      actor,
-      'ATTENDANCE_MARKED',
+    this.logAudit(activeActor, 'ATTENDANCE_MARKED',
       'ATTENDANCE',
       `Marked attendance for ${first.className}-${first.section} on ${first.date} (${records.length} students).`
     );
@@ -1012,14 +1032,15 @@ export class SchoolDatabase {
     return this.get<Examination[]>(STORAGE_KEYS.EXAMS, INITIAL_EXAMS);
   }
 
-  public getMarks(actor: UserProfile, examId: string, className: string, subjectName: string): MarksEntry[] {
+  public getMarks(actor: UserProfile | null | undefined, examId: string, className: string, subjectName: string): MarksEntry[] {
+    const activeActor = this.resolveActor(actor);
     const allMarks = this.get<MarksEntry[]>(STORAGE_KEYS.MARKS, INITIAL_MARKS);
     const existing = allMarks.filter((m) => m.examId === examId && m.className === className && m.subjectName === subjectName);
 
     if (existing.length > 0) return existing;
 
     // Generate initial blank sheet for students of this class
-    const students = this.getStudents(actor, className);
+    const students = this.getStudents(activeActor, className);
     return students.map((s, idx) => ({
       id: `mark-draft-${s.id}-${examId}`,
       examId,
@@ -1034,7 +1055,8 @@ export class SchoolDatabase {
     }));
   }
 
-  public saveMarks(actor: UserProfile, marks: MarksEntry[]): void {
+  public saveMarks(actor: UserProfile | null | undefined, marks: MarksEntry[]): void {
+    const activeActor = this.resolveActor(actor);
     if (marks.length === 0) return;
 
     // Validate marks limits
@@ -1059,9 +1081,7 @@ export class SchoolDatabase {
     this.set(STORAGE_KEYS.MARKS, Array.from(markMap.values()));
 
     const first = marks[0];
-    this.logAudit(
-      actor,
-      'MARKS_ENTERED',
+    this.logAudit(activeActor, 'MARKS_ENTERED',
       'ACADEMICS',
       `Entered ${first.subjectName} examination marks for ${first.className} (${marks.length} students).`
     );
@@ -1081,29 +1101,30 @@ export class SchoolDatabase {
   // ----------------------------------------------------------------------
   // FEES & ACCOUNTS (RESTRICTED - MANAGER ONLY!)
   // ----------------------------------------------------------------------
-  private assertManagerRole(actor: UserProfile, actionDesc: string) {
-    if (actor.role !== 'MANAGER') {
-      throw new Error(`Access Denied: Only Manager Sir has authorized access to ${actionDesc}. Access denied for ${actor.role}.`);
+  private assertManagerRole(actor: UserProfile | null | undefined, actionDesc: string) {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.role !== 'MANAGER') {
+      throw new Error(`Access Denied: Only Manager Sir has authorized access to ${actionDesc}. Access denied for ${activeActor.role}.`);
     }
   }
 
-  public getFeeStructures(actor: UserProfile): FeeStructure[] {
+  public getFeeStructures(actor?: UserProfile | null): FeeStructure[] {
     this.assertManagerRole(actor, 'Fee Structures');
     return this.get<FeeStructure[]>(STORAGE_KEYS.FEE_STRUCTURES, INITIAL_FEE_STRUCTURES);
   }
 
-  public getFeeInvoices(actor: UserProfile): FeeInvoice[] {
+  public getFeeInvoices(actor?: UserProfile | null): FeeInvoice[] {
     this.assertManagerRole(actor, 'Fee Invoices & Student Balances');
     return this.get<FeeInvoice[]>(STORAGE_KEYS.INVOICES, INITIAL_INVOICES);
   }
 
-  public getPaymentReceipts(actor: UserProfile): PaymentReceipt[] {
+  public getPaymentReceipts(actor?: UserProfile | null): PaymentReceipt[] {
     this.assertManagerRole(actor, 'Payment Receipts and Ledger');
     return this.get<PaymentReceipt[]>(STORAGE_KEYS.RECEIPTS, INITIAL_RECEIPTS);
   }
 
   public recordFeePayment(
-    actor: UserProfile,
+    actor: UserProfile | null | undefined,
     data: {
       invoiceId: string;
       amount: number;
@@ -1112,7 +1133,8 @@ export class SchoolDatabase {
       remarks?: string;
     }
   ): PaymentReceipt {
-    this.assertManagerRole(actor, 'Record Fee Payments');
+    const activeActor = this.resolveActor(actor);
+    this.assertManagerRole(activeActor, 'Record Fee Payments');
 
     const invoices = this.get<FeeInvoice[]>(STORAGE_KEYS.INVOICES, INITIAL_INVOICES);
     const invoice = invoices.find((inv) => inv.id === data.invoiceId);
@@ -1143,7 +1165,7 @@ export class SchoolDatabase {
       paymentMode: data.paymentMode,
       transactionRef: data.transactionRef,
       paymentDate: new Date().toISOString().split('T')[0],
-      receivedBy: actor.fullName,
+      receivedBy: activeActor.fullName,
       feeBreakdown: [{ head: `Fee Payment (${invoice.monthOrPeriod})`, amount: data.amount }],
       remarks: data.remarks,
     };
@@ -1152,9 +1174,7 @@ export class SchoolDatabase {
     this.set(STORAGE_KEYS.INVOICES, invoices);
     this.set(STORAGE_KEYS.RECEIPTS, receipts);
 
-    this.logAudit(
-      actor,
-      'PAYMENT_RECORDED',
+    this.logAudit(activeActor, 'PAYMENT_RECORDED',
       'FEES',
       `Recorded payment ₹${data.amount} via ${data.paymentMode} for ${invoice.studentName}. Receipt: ${receiptNo}`,
       newReceipt.id
@@ -1246,7 +1266,8 @@ export class SchoolDatabase {
     return issues;
   }
 
-  public generateUdiseSnapshot(actor: UserProfile): UdiseSnapshot {
+  public generateUdiseSnapshot(actor?: UserProfile | null): UdiseSnapshot {
+    const activeActor = this.resolveActor(actor);
     const students = this.get<Student[]>(STORAGE_KEYS.STUDENTS, INITIAL_STUDENTS);
     const boys = students.filter((s) => s.gender === 'MALE').length;
     const girls = students.filter((s) => s.gender === 'FEMALE').length;
@@ -1272,9 +1293,7 @@ export class SchoolDatabase {
       status: 'VALIDATED',
     };
 
-    this.logAudit(
-      actor,
-      'UDISE_SNAPSHOT_GENERATED',
+    this.logAudit(activeActor, 'UDISE_SNAPSHOT_GENERATED',
       'UDISE',
       `Generated official UDISE+ report snapshot for 2026-2027 (${students.length} students enrolled).`
     );

@@ -3,6 +3,7 @@ import { useAuth } from './context/AuthContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar, ActiveTab } from './components/Sidebar';
 import { RevokedBanner } from './components/RevokedBanner';
+import { LoginPage } from './components/LoginPage';
 import { DashboardOverview } from './components/DashboardOverview';
 import { AdmissionsModule } from './components/AdmissionsModule';
 import { AttendanceModule } from './components/AttendanceModule';
@@ -16,7 +17,12 @@ import { AppUpdatesModule } from './components/AppUpdatesModule';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
-  const { currentUser, isRevoked } = useAuth();
+  const { currentUser } = useAuth();
+
+  // If user is not logged in, show dedicated Role-Based Login Page
+  if (!currentUser) {
+    return <LoginPage />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
@@ -63,4 +69,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-
