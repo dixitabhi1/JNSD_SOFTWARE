@@ -68,7 +68,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem('jnsd_erp_auth_user');
+    const saved = localStorage.getItem('jnsd_erp_auth_user_v2');
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {
       id: 'user-manager-1',
       email: 'manager@jnsd.edu',
-      fullName: 'Sri Ramesh Chandra Sharma (Manager Sir)',
+      fullName: 'Lalitesh Kumar Dixit (Manager Sir)',
       role: 'MANAGER',
       status: 'ACTIVE',
       mustChangePassword: false,
@@ -90,9 +90,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem('jnsd_erp_auth_user', JSON.stringify(currentUser));
+      localStorage.setItem('jnsd_erp_auth_user_v2', JSON.stringify(currentUser));
     } else {
-      localStorage.removeItem('jnsd_erp_auth_user');
+      localStorage.removeItem('jnsd_erp_auth_user_v2');
     }
   }, [currentUser]);
 
@@ -170,7 +170,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCurrentUser({
         id: 'user-manager-1',
         email: 'manager@jnsd.edu',
-        fullName: 'Sri Ramesh Chandra Sharma (Manager Sir)',
+        fullName: 'Lalitesh Kumar Dixit (Manager Sir)',
         role: 'MANAGER',
         status: 'ACTIVE',
         mustChangePassword: false,
@@ -179,7 +179,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCurrentUser({
         id: 'user-principal-1',
         email: 'principal@jnsd.edu',
-        fullName: 'Dr. Aruna Saxena (Principal)',
+        fullName: 'Ram Jiyawan Yadav (Principal)',
         role: 'PRINCIPAL',
         status: 'ACTIVE',
         mustChangePassword: false,

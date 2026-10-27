@@ -53,8 +53,8 @@ export const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         {/* School Crest */}
-        <div className="inline-flex px-5 py-3 bg-white rounded-2xl shadow-lg border border-amber-300/60 mb-3 ring-4 ring-amber-500/10">
-          <img src="/school-logo-exact.png" alt="JNSD Education Centre Logo" className="h-16 w-auto object-contain drop-shadow-sm" />
+        <div className="inline-flex p-3 bg-white rounded-2xl shadow-lg border border-amber-300/60 mb-3 ring-4 ring-amber-500/10">
+          <img src="/school-logo.png" alt="JNSD Education Centre Logo" className="w-20 h-20 object-contain drop-shadow-sm" />
         </div>
 
         <h1 className="text-2xl font-black text-school-900 tracking-tight">JNSD EDUCATION CENTRE</h1>

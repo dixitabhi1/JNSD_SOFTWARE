@@ -7,7 +7,7 @@ interface SchoolLogoProps {
 }
 
 export const SchoolLogo: React.FC<SchoolLogoProps> = ({
-  className = 'h-10 w-auto',
+  className = 'w-10 h-10',
   size,
   alt = 'JNSD Education Centre Crest',
 }) => {
@@ -15,7 +15,7 @@ export const SchoolLogo: React.FC<SchoolLogoProps> = ({
 
   return (
     <img
-      src="/school-logo-exact.png"
+      src="/school-logo.png"
       alt={alt}
       className={`${className} object-contain`}
       style={style}

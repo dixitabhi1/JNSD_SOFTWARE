@@ -649,17 +649,17 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
 // ========================================================================
 
 const STORAGE_KEYS = {
-  STUDENTS: 'jnsd_erp_students_v1',
-  STAFF: 'jnsd_erp_staff_v1',
-  ATTENDANCE: 'jnsd_erp_attendance_v1',
-  EXAMS: 'jnsd_erp_exams_v1',
-  MARKS: 'jnsd_erp_marks_v1',
-  FEE_STRUCTURES: 'jnsd_erp_fee_structures_v1',
-  INVOICES: 'jnsd_erp_invoices_v1',
-  RECEIPTS: 'jnsd_erp_receipts_v1',
-  AUDIT_LOGS: 'jnsd_erp_audit_logs_v1',
-  UDISE_SNAPSHOTS: 'jnsd_erp_udise_snapshots_v1',
-  FEE_SUBMISSIONS: 'jnsd_erp_fee_submissions_v1',
+  STUDENTS: 'jnsd_erp_students_v2',
+  STAFF: 'jnsd_erp_staff_v2',
+  ATTENDANCE: 'jnsd_erp_attendance_v2',
+  EXAMS: 'jnsd_erp_exams_v2',
+  MARKS: 'jnsd_erp_marks_v2',
+  FEE_STRUCTURES: 'jnsd_erp_fee_structures_v2',
+  INVOICES: 'jnsd_erp_invoices_v2',
+  RECEIPTS: 'jnsd_erp_receipts_v2',
+  AUDIT_LOGS: 'jnsd_erp_audit_logs_v2',
+  UDISE_SNAPSHOTS: 'jnsd_erp_udise_snapshots_v2',
+  FEE_SUBMISSIONS: 'jnsd_erp_fee_submissions_v2',
 };
 
 export class SchoolDatabase {

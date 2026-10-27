@@ -1303,7 +1303,7 @@ Affiliation: CBSE-AFF-JNSD-0921 | Session 2026-27`;
             <div className="p-8 space-y-6 text-slate-800 bg-white">
               <div className="text-center border-b-2 border-school-900 pb-3">
                 <div className="flex items-center justify-center space-x-3 mb-1">
-                  <img src="/school-logo-exact.png" alt="JNSD School Logo" className="h-12 w-auto object-contain" />
+                  <img src="/school-logo.png" alt="JNSD School Logo" className="w-14 h-14 object-contain" />
                   <div>
                     <h2 className="text-xl font-black text-school-900 tracking-wide">JNSD EDUCATION CENTRE</h2>
                     <p className="text-[10px] text-slate-500 font-semibold">Affiliation: CBSE-AFF-JNSD-0921 • Kanpur, UP</p>
