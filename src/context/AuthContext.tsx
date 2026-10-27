@@ -15,20 +15,20 @@ export interface DemoAccount {
 export const DEMO_ACCOUNTS: DemoAccount[] = [
   {
     role: 'MANAGER',
-    label: 'Manager Sir',
+    label: 'Manager Sir (Lalitesh Kumar Dixit)',
     email: 'manager@jnsd.edu',
     staffId: 'JNSD-MGR-001',
     defaultPass: 'Manager@2026',
-    description: 'Full Administrative Authority & Exclusive Fees Management',
+    description: 'Full Administrative & Financial Authority (Manager Sir: Lalitesh Kumar Dixit)',
     status: 'ACTIVE',
   },
   {
     role: 'PRINCIPAL',
-    label: 'Principal Madam',
+    label: 'Principal (Ram Jiyawan Yadav)',
     email: 'principal@jnsd.edu',
     staffId: 'JNSD-PRN-002',
     defaultPass: 'Principal@2026',
-    description: 'Admissions, Teacher Accounts & Academic Oversight (Zero Fee Access)',
+    description: 'Admissions, Academics, Staff & Fee Submissions with Manager Approval',
     status: 'ACTIVE',
   },
   {

@@ -64,14 +64,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
       id: 'fees' as ActiveTab,
       label: 'Fees & Accounts',
       icon: CreditCard,
-      allowed: isManager, // STRICTLY MANAGER ONLY!
-      restrictedNotice: 'Manager Exclusive',
+      allowed: isManager || isPrincipal,
+      badge: isPrincipal ? 'Approval Mode' : undefined,
     },
     {
       id: 'receipt-ocr' as ActiveTab,
       label: 'Fee Receipt OCR',
       icon: ScanLine,
-      allowed: isManager, // STRICTLY MANAGER ONLY!
+      allowed: isManager || isPrincipal, // STRICTLY MANAGER ONLY!
       restrictedNotice: 'Manager Exclusive',
     },
     {

@@ -6,6 +6,8 @@ import {
   Examination,
   MarksEntry,
   FeeStructure,
+  FeeSubmission,
+  FeeSubmissionStatus,
   FeeInvoice,
   PaymentReceipt,
   AuditLog,
@@ -23,7 +25,7 @@ export const INITIAL_STAFF: StaffMember[] = [
     id: 'staff-1',
     userId: 'user-manager-1',
     employeeId: 'JNSD-MGR-001',
-    fullName: 'Sri Ramesh Chandra Sharma',
+    fullName: 'Lalitesh Kumar Dixit',
     email: 'manager@jnsd.edu',
     role: 'MANAGER',
     designation: 'Manager Sir (Full Administrative Head)',
@@ -39,7 +41,7 @@ export const INITIAL_STAFF: StaffMember[] = [
     id: 'staff-2',
     userId: 'user-principal-1',
     employeeId: 'JNSD-PRN-002',
-    fullName: 'Dr. Aruna Saxena',
+    fullName: 'Ram Jiyawan Yadav',
     email: 'principal@jnsd.edu',
     role: 'PRINCIPAL',
     designation: 'Principal (Admissions & Academic Head)',
@@ -390,6 +392,25 @@ export const INITIAL_INVOICES: FeeInvoice[] = [
   },
 ];
 
+
+export const INITIAL_FEE_SUBMISSIONS: FeeSubmission[] = [
+  {
+    id: 'sub-demo-1',
+    invoiceId: 'inv-3',
+    studentId: 'stu-3',
+    studentName: 'Reyansh Yadav',
+    admissionNo: 'JNSD/2026/003',
+    className: 'Class 1-B',
+    amount: 1000,
+    paymentMode: 'CASH',
+    remarks: 'Received partial monthly fee in cash at office',
+    submittedBy: 'Ram Jiyawan Yadav (Principal)',
+    submittedByRole: 'PRINCIPAL',
+    submittedAt: '2026-04-14T10:30:00Z',
+    status: 'PENDING_MANAGER_APPROVAL',
+  },
+];
+
 export const INITIAL_RECEIPTS: PaymentReceipt[] = [
   {
     id: 'rec-1',
@@ -403,7 +424,8 @@ export const INITIAL_RECEIPTS: PaymentReceipt[] = [
     paymentMode: 'UPI',
     transactionRef: 'UPI/314159265358',
     paymentDate: '2026-04-10',
-    receivedBy: 'Sri Ramesh Chandra Sharma (Manager Sir)',
+    receivedBy: 'Lalitesh Kumar Dixit (Manager Sir)',
+    approvedBy: 'Lalitesh Kumar Dixit (Manager Sir)',
     feeBreakdown: [
       { head: 'Tuition Fee (April)', amount: 2200 },
       { head: 'Computer/Smart Lab', amount: 500 },
@@ -422,7 +444,7 @@ export const INITIAL_RECEIPTS: PaymentReceipt[] = [
     amount: 3000,
     paymentMode: 'CASH',
     paymentDate: '2026-04-12',
-    receivedBy: 'Sri Ramesh Chandra Sharma (Manager Sir)',
+    receivedBy: 'Lalitesh Kumar Dixit (Manager Sir)',
     feeBreakdown: [
       { head: 'Tuition Fee (April) with Concession', amount: 1800 },
       { head: 'Computer/Smart Lab', amount: 500 },
@@ -593,7 +615,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   {
     id: 'log-1',
     timestamp: '2026-04-05T09:30:00Z',
-    actorName: 'Dr. Aruna Saxena',
+    actorName: 'Ram Jiyawan Yadav',
     actorRole: 'PRINCIPAL',
     action: 'STUDENT_ADMISSION',
     module: 'ADMISSIONS',
@@ -603,7 +625,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   {
     id: 'log-2',
     timestamp: '2026-04-10T11:15:00Z',
-    actorName: 'Sri Ramesh Chandra Sharma',
+    actorName: 'Lalitesh Kumar Dixit',
     actorRole: 'MANAGER',
     action: 'PAYMENT_RECORDED',
     module: 'FEES',
@@ -613,7 +635,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   {
     id: 'log-3',
     timestamp: '2026-10-15T11:30:00Z',
-    actorName: 'Sri Ramesh Chandra Sharma',
+    actorName: 'Lalitesh Kumar Dixit',
     actorRole: 'MANAGER',
     action: 'ACCOUNT_REVOKED',
     module: 'STAFF',
@@ -637,6 +659,7 @@ const STORAGE_KEYS = {
   RECEIPTS: 'jnsd_erp_receipts_v1',
   AUDIT_LOGS: 'jnsd_erp_audit_logs_v1',
   UDISE_SNAPSHOTS: 'jnsd_erp_udise_snapshots_v1',
+  FEE_SUBMISSIONS: 'jnsd_erp_fee_submissions_v1',
 };
 
 export class SchoolDatabase {
@@ -1098,29 +1121,94 @@ export class SchoolDatabase {
     return 'E (Needs Improvement)';
   }
 
-  // ----------------------------------------------------------------------
-  // FEES & ACCOUNTS (RESTRICTED - MANAGER ONLY!)
+    // ----------------------------------------------------------------------
+  // FEES & ACCOUNTS (MANAGED BY MANAGER & PRINCIPAL WITH 2-TIER CONFIRMATION)
   // ----------------------------------------------------------------------
   private assertManagerRole(actor: UserProfile | null | undefined, actionDesc: string) {
     const activeActor = this.resolveActor(actor);
     if (activeActor.role !== 'MANAGER') {
-      throw new Error(`Access Denied: Only Manager Sir has authorized access to ${actionDesc}. Access denied for ${activeActor.role}.`);
+      throw new Error(`Access Denied: Only Manager Sir (Lalitesh Kumar Dixit) has authorized access to ${actionDesc}. Access denied for ${activeActor.role}.`);
+    }
+  }
+
+  private assertFeesAccess(actor: UserProfile | null | undefined, actionDesc: string) {
+    const activeActor = this.resolveActor(actor);
+    if (activeActor.role !== 'MANAGER' && activeActor.role !== 'PRINCIPAL') {
+      throw new Error(`Access Denied: Only Manager Sir and Principal have authorized access to ${actionDesc}. Access denied for ${activeActor.role}.`);
     }
   }
 
   public getFeeStructures(actor?: UserProfile | null): FeeStructure[] {
-    this.assertManagerRole(actor, 'Fee Structures');
+    this.assertFeesAccess(actor, 'Fee Structures');
     return this.get<FeeStructure[]>(STORAGE_KEYS.FEE_STRUCTURES, INITIAL_FEE_STRUCTURES);
   }
 
+  public addFeeStructure(
+    actor: UserProfile | null | undefined,
+    data: Omit<FeeStructure, 'id'>
+  ): FeeStructure {
+    this.assertFeesAccess(actor, 'Add Fee Structure');
+    const activeActor = this.resolveActor(actor);
+    if (data.amount <= 0) throw new Error('Fee amount must be greater than zero.');
+
+    const structures = this.get<FeeStructure[]>(STORAGE_KEYS.FEE_STRUCTURES, INITIAL_FEE_STRUCTURES);
+    const newStructure: FeeStructure = {
+      id: `fee-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      ...data,
+    };
+    structures.push(newStructure);
+    this.set(STORAGE_KEYS.FEE_STRUCTURES, structures);
+
+    this.logAudit(
+      activeActor,
+      'FEE_STRUCTURE_ADDED',
+      'FEES',
+      `Added fee structure for ${data.className}: ${data.feeHead} (₹${data.amount} ${data.frequency})`,
+      newStructure.id
+    );
+    return newStructure;
+  }
+
+  public updateFeeStructure(
+    actor: UserProfile | null | undefined,
+    id: string,
+    amount: number
+  ): FeeStructure {
+    this.assertFeesAccess(actor, 'Update Fee Structure');
+    const activeActor = this.resolveActor(actor);
+    if (amount <= 0) throw new Error('Fee amount must be greater than zero.');
+
+    const structures = this.get<FeeStructure[]>(STORAGE_KEYS.FEE_STRUCTURES, INITIAL_FEE_STRUCTURES);
+    const item = structures.find((s) => s.id === id);
+    if (!item) throw new Error('Fee structure record not found.');
+
+    const oldAmount = item.amount;
+    item.amount = amount;
+    this.set(STORAGE_KEYS.FEE_STRUCTURES, structures);
+
+    this.logAudit(
+      activeActor,
+      'FEE_STRUCTURE_UPDATED',
+      'FEES',
+      `Updated ${item.className} ${item.feeHead} from ₹${oldAmount} to ₹${amount}`,
+      item.id
+    );
+    return item;
+  }
+
   public getFeeInvoices(actor?: UserProfile | null): FeeInvoice[] {
-    this.assertManagerRole(actor, 'Fee Invoices & Student Balances');
+    this.assertFeesAccess(actor, 'Fee Invoices & Student Balances');
     return this.get<FeeInvoice[]>(STORAGE_KEYS.INVOICES, INITIAL_INVOICES);
   }
 
   public getPaymentReceipts(actor?: UserProfile | null): PaymentReceipt[] {
-    this.assertManagerRole(actor, 'Payment Receipts and Ledger');
+    this.assertFeesAccess(actor, 'Payment Receipts and Ledger');
     return this.get<PaymentReceipt[]>(STORAGE_KEYS.RECEIPTS, INITIAL_RECEIPTS);
+  }
+
+  public getFeeSubmissions(actor?: UserProfile | null): FeeSubmission[] {
+    this.assertFeesAccess(actor, 'Fee Submissions Queue');
+    return this.get<FeeSubmission[]>(STORAGE_KEYS.FEE_SUBMISSIONS, INITIAL_FEE_SUBMISSIONS);
   }
 
   public recordFeePayment(
@@ -1132,9 +1220,9 @@ export class SchoolDatabase {
       transactionRef?: string;
       remarks?: string;
     }
-  ): PaymentReceipt {
+  ): { status: 'CONFIRMED'; receipt: PaymentReceipt } | { status: 'PENDING_MANAGER_APPROVAL'; submission: FeeSubmission } {
     const activeActor = this.resolveActor(actor);
-    this.assertManagerRole(activeActor, 'Record Fee Payments');
+    this.assertFeesAccess(activeActor, 'Record Fee Payments');
 
     const invoices = this.get<FeeInvoice[]>(STORAGE_KEYS.INVOICES, INITIAL_INVOICES);
     const invoice = invoices.find((inv) => inv.id === data.invoiceId);
@@ -1145,10 +1233,45 @@ export class SchoolDatabase {
       throw new Error(`Payment amount (₹${data.amount}) cannot exceed remaining balance (₹${invoice.balanceAmount}).`);
     }
 
+    // 2-TIER APPROVAL FLOW:
+    // If Principal submits, it enters PENDING_MANAGER_APPROVAL without touching invoice balance
+    if (activeActor.role === 'PRINCIPAL') {
+      const submissions = this.get<FeeSubmission[]>(STORAGE_KEYS.FEE_SUBMISSIONS, INITIAL_FEE_SUBMISSIONS);
+      const submission: FeeSubmission = {
+        id: `sub-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        invoiceId: invoice.id,
+        studentId: invoice.studentId,
+        studentName: invoice.studentName,
+        admissionNo: invoice.admissionNo,
+        className: `${invoice.className}-${invoice.section}`,
+        amount: data.amount,
+        paymentMode: data.paymentMode,
+        transactionRef: data.transactionRef,
+        remarks: data.remarks,
+        submittedBy: activeActor.fullName,
+        submittedByRole: 'PRINCIPAL',
+        submittedAt: new Date().toISOString(),
+        status: 'PENDING_MANAGER_APPROVAL',
+      };
+
+      submissions.unshift(submission);
+      this.set(STORAGE_KEYS.FEE_SUBMISSIONS, submissions);
+
+      this.logAudit(
+        activeActor,
+        'FEE_PAYMENT_SUBMITTED',
+        'FEES',
+        `Principal ${activeActor.fullName} submitted fee payment ₹${data.amount} via ${data.paymentMode} for ${invoice.studentName}. Awaiting Manager Sir (Lalitesh Kumar Dixit) confirmation.`,
+        submission.id
+      );
+
+      return { status: 'PENDING_MANAGER_APPROVAL', submission };
+    }
+
+    // If Manager Sir submits, it is directly confirmed and receipt issued immediately
     const receipts = this.get<PaymentReceipt[]>(STORAGE_KEYS.RECEIPTS, INITIAL_RECEIPTS);
     const receiptNo = `REC/${new Date().getFullYear()}/${String(receipts.length + 1).padStart(3, '0')}`;
 
-    // Update invoice balance
     invoice.paidAmount += data.amount;
     invoice.balanceAmount -= data.amount;
     invoice.status = invoice.balanceAmount === 0 ? 'PAID' : 'PARTIALLY_PAID';
@@ -1166,6 +1289,7 @@ export class SchoolDatabase {
       transactionRef: data.transactionRef,
       paymentDate: new Date().toISOString().split('T')[0],
       receivedBy: activeActor.fullName,
+      approvedBy: activeActor.fullName,
       feeBreakdown: [{ head: `Fee Payment (${invoice.monthOrPeriod})`, amount: data.amount }],
       remarks: data.remarks,
     };
@@ -1174,13 +1298,114 @@ export class SchoolDatabase {
     this.set(STORAGE_KEYS.INVOICES, invoices);
     this.set(STORAGE_KEYS.RECEIPTS, receipts);
 
-    this.logAudit(activeActor, 'PAYMENT_RECORDED',
+    this.logAudit(
+      activeActor,
+      'PAYMENT_RECORDED',
       'FEES',
       `Recorded payment ₹${data.amount} via ${data.paymentMode} for ${invoice.studentName}. Receipt: ${receiptNo}`,
       newReceipt.id
     );
 
-    return newReceipt;
+    return { status: 'CONFIRMED', receipt: newReceipt };
+  }
+
+  public approveFeeSubmission(
+    actor: UserProfile | null | undefined,
+    submissionId: string
+  ): { submission: FeeSubmission; receipt: PaymentReceipt } {
+    const activeActor = this.resolveActor(actor);
+    this.assertManagerRole(activeActor, 'Approve Fee Payments');
+
+    const submissions = this.get<FeeSubmission[]>(STORAGE_KEYS.FEE_SUBMISSIONS, INITIAL_FEE_SUBMISSIONS);
+    const submission = submissions.find((s) => s.id === submissionId);
+    if (!submission) throw new Error('Fee submission not found.');
+    if (submission.status !== 'PENDING_MANAGER_APPROVAL') {
+      throw new Error(`Submission cannot be approved because status is already ${submission.status}.`);
+    }
+
+    const invoices = this.get<FeeInvoice[]>(STORAGE_KEYS.INVOICES, INITIAL_INVOICES);
+    const invoice = invoices.find((inv) => inv.id === submission.invoiceId);
+    if (!invoice) throw new Error('Associated invoice not found.');
+
+    if (submission.amount > invoice.balanceAmount) {
+      throw new Error(`Submission amount (₹${submission.amount}) exceeds remaining invoice balance (₹${invoice.balanceAmount}).`);
+    }
+
+    const receipts = this.get<PaymentReceipt[]>(STORAGE_KEYS.RECEIPTS, INITIAL_RECEIPTS);
+    const receiptNo = `REC/${new Date().getFullYear()}/${String(receipts.length + 1).padStart(3, '0')}`;
+
+    invoice.paidAmount += submission.amount;
+    invoice.balanceAmount -= submission.amount;
+    invoice.status = invoice.balanceAmount === 0 ? 'PAID' : 'PARTIALLY_PAID';
+
+    const newReceipt: PaymentReceipt = {
+      id: `rec-${Date.now()}`,
+      receiptNo,
+      invoiceId: invoice.id,
+      studentId: invoice.studentId,
+      studentName: invoice.studentName,
+      admissionNo: invoice.admissionNo,
+      className: submission.className,
+      amount: submission.amount,
+      paymentMode: submission.paymentMode,
+      transactionRef: submission.transactionRef,
+      paymentDate: new Date().toISOString().split('T')[0],
+      receivedBy: submission.submittedBy,
+      approvedBy: activeActor.fullName,
+      feeBreakdown: [{ head: `Approved Fee Payment (${invoice.monthOrPeriod})`, amount: submission.amount }],
+      remarks: `${submission.remarks || 'Standard Fee'} | Approved by Manager Sir (${activeActor.fullName})`,
+    };
+
+    receipts.unshift(newReceipt);
+    submission.status = 'APPROVED';
+    submission.approvedBy = activeActor.fullName;
+    submission.approvedAt = new Date().toISOString();
+    submission.receiptId = newReceipt.id;
+
+    this.set(STORAGE_KEYS.INVOICES, invoices);
+    this.set(STORAGE_KEYS.RECEIPTS, receipts);
+    this.set(STORAGE_KEYS.FEE_SUBMISSIONS, submissions);
+
+    this.logAudit(
+      activeActor,
+      'FEE_PAYMENT_APPROVED',
+      'FEES',
+      `Manager Sir ${activeActor.fullName} confirmed fee payment ₹${submission.amount} for ${submission.studentName} (Submitted by ${submission.submittedBy}). Receipt: ${receiptNo}`,
+      newReceipt.id
+    );
+
+    return { submission, receipt: newReceipt };
+  }
+
+  public rejectFeeSubmission(
+    actor: UserProfile | null | undefined,
+    submissionId: string,
+    reason: string
+  ): FeeSubmission {
+    const activeActor = this.resolveActor(actor);
+    this.assertManagerRole(activeActor, 'Reject Fee Payments');
+
+    const submissions = this.get<FeeSubmission[]>(STORAGE_KEYS.FEE_SUBMISSIONS, INITIAL_FEE_SUBMISSIONS);
+    const submission = submissions.find((s) => s.id === submissionId);
+    if (!submission) throw new Error('Fee submission not found.');
+    if (submission.status !== 'PENDING_MANAGER_APPROVAL') {
+      throw new Error(`Submission cannot be rejected because status is already ${submission.status}.`);
+    }
+
+    submission.status = 'REJECTED';
+    submission.rejectionReason = reason;
+
+    this.set(STORAGE_KEYS.FEE_SUBMISSIONS, submissions);
+
+    this.logAudit(
+      activeActor,
+      'FEE_PAYMENT_REJECTED',
+      'FEES',
+      `Manager Sir ${activeActor.fullName} rejected fee submission of ₹${submission.amount} for ${submission.studentName}. Reason: ${reason}`,
+      submission.id
+    );
+
+    return submission;
   }
 
   // ----------------------------------------------------------------------

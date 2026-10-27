@@ -247,7 +247,7 @@ export const ExaminationsModule: React.FC = () => {
               {/* Header */}
               <div className="text-center border-b-2 border-school-900 pb-4">
                 <div className="flex items-center justify-center space-x-3 mb-2">
-                  <img src="/school-logo.png" alt="JNSD School Logo" className="w-14 h-14 object-contain" />
+                  <img src="/school-logo-exact.png" alt="JNSD School Logo" className="h-14 w-auto object-contain" />
                   <div>
                     <h1 className="text-2xl font-black text-school-900 tracking-wide">JNSD EDUCATION CENTRE</h1>
                     <p className="text-xs text-slate-600 font-medium">Affiliation: CBSE-AFF-JNSD-0921 • School Code: 09210401802</p>

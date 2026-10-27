@@ -110,7 +110,7 @@ export const ReceiptOcrModule: React.FC = () => {
     }
 
     try {
-      const receipt = db.recordFeePayment(currentUser, {
+      const res = db.recordFeePayment(currentUser, {
         invoiceId: matchedInvoice.id,
         amount,
         paymentMode: 'UPI',
@@ -118,7 +118,11 @@ export const ReceiptOcrModule: React.FC = () => {
         remarks: `Reconciled via Receipt OCR (Receipt Ref: ${receiptNo})`,
       });
 
-      setReconciliationSuccess(receipt);
+      if (res.status === 'CONFIRMED') {
+        setReconciliationSuccess(res.receipt);
+      } else {
+        alert(`Payment submission of ₹${amount} queued for Manager Sir's (Lalitesh Kumar Dixit) confirmation.`);
+      }
       setExtractedData(null);
       setSelectedFile(null);
     } catch (err: any) {

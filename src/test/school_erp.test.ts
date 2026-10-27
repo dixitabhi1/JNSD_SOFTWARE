@@ -15,7 +15,7 @@ describe('JNSD EDUCATION CENTRE SCHOOL ERP - TEST SUITE', () => {
     managerUser = {
       id: 'user-manager-1',
       email: 'manager@jnsd.edu',
-      fullName: 'Sri Ramesh Chandra Sharma (Manager Sir)',
+      fullName: 'Lalitesh Kumar Dixit (Manager Sir)',
       role: 'MANAGER',
       status: 'ACTIVE',
     };
@@ -23,7 +23,7 @@ describe('JNSD EDUCATION CENTRE SCHOOL ERP - TEST SUITE', () => {
     principalUser = {
       id: 'user-principal-1',
       email: 'principal@jnsd.edu',
-      fullName: 'Dr. Aruna Saxena (Principal)',
+      fullName: 'Ram Jiyawan Yadav (Principal)',
       role: 'PRINCIPAL',
       status: 'ACTIVE',
     };
@@ -58,28 +58,55 @@ describe('JNSD EDUCATION CENTRE SCHOOL ERP - TEST SUITE', () => {
       expect(structures.length).toBeGreaterThan(0);
     });
 
-    it('Principal is strictly blocked from accessing Fees & Accounts (Zero Access Rule)', () => {
-      expect(() => db.getFeeInvoices(principalUser)).toThrowError(
-        /Access Denied: Only Manager Sir has authorized access to Fee Invoices/
-      );
-      expect(() => db.getFeeStructures(principalUser)).toThrowError(
-        /Access Denied: Only Manager Sir has authorized access to Fee Structures/
-      );
-      expect(() =>
-        db.recordFeePayment(principalUser, {
-          invoiceId: 'inv-1',
-          amount: 1000,
-          paymentMode: 'CASH',
-        })
-      ).toThrowError(/Access Denied/);
+    it('Manager and Principal can both access Fee Invoices, Structures, and Submissions Queue', () => {
+      const invoices = db.getFeeInvoices(principalUser);
+      expect(invoices.length).toBeGreaterThan(0);
+
+      const structures = db.getFeeStructures(principalUser);
+      expect(structures.length).toBeGreaterThan(0);
+
+      const submissions = db.getFeeSubmissions(principalUser);
+      expect(Array.isArray(submissions)).toBe(true);
+    });
+
+    it('Principal submission creates a PENDING_MANAGER_APPROVAL record without altering invoice balance', () => {
+      const invoices = db.getFeeInvoices(principalUser);
+      const target = invoices.find((inv) => inv.balanceAmount > 0)!;
+      const initialBalance = target.balanceAmount;
+
+      const subRes = db.recordFeePayment(principalUser, {
+        invoiceId: target.id,
+        amount: 500,
+        paymentMode: 'CASH',
+        remarks: 'Test Principal submission',
+      });
+
+      expect(subRes.status).toBe('PENDING_MANAGER_APPROVAL');
+      if (subRes.status === 'PENDING_MANAGER_APPROVAL') {
+        expect(subRes.submission.submittedByRole).toBe('PRINCIPAL');
+        expect(subRes.submission.amount).toBe(500);
+
+        // Verify invoice balance did NOT change yet!
+        const refreshed = db.getFeeInvoices(managerUser).find((i) => i.id === target.id)!;
+        expect(refreshed.balanceAmount).toBe(initialBalance);
+
+        // Now Manager Sir confirms the submission
+        const approvedRes = db.approveFeeSubmission(managerUser, subRes.submission.id);
+        expect(approvedRes.submission.status).toBe('APPROVED');
+        expect(approvedRes.receipt.approvedBy).toBe('Lalitesh Kumar Dixit (Manager Sir)');
+
+        // Now invoice balance IS deducted!
+        const finalInvoice = db.getFeeInvoices(managerUser).find((i) => i.id === target.id)!;
+        expect(finalInvoice.balanceAmount).toBe(initialBalance - 500);
+      }
     });
 
     it('Class Teachers are strictly blocked from accessing Fees & Accounts', () => {
       expect(() => db.getFeeInvoices(teacherUser)).toThrowError(
-        /Access Denied: Only Manager Sir has authorized access to Fee Invoices/
+        /Access Denied: Only Manager Sir and Principal have authorized access to Fee Invoices/
       );
       expect(() => db.getFeeStructures(teacherUser)).toThrowError(
-        /Access Denied: Only Manager Sir has authorized access to Fee Structures/
+        /Access Denied: Only Manager Sir and Principal have authorized access to Fee Structures/
       );
     });
 
@@ -109,7 +136,7 @@ describe('JNSD EDUCATION CENTRE SCHOOL ERP - TEST SUITE', () => {
       const initialPaid = targetInvoice.paidAmount;
       const paymentAmount = 500;
 
-      const receipt = db.recordFeePayment(managerUser, {
+      const res = db.recordFeePayment(managerUser, {
         invoiceId: targetInvoice.id,
         amount: paymentAmount,
         paymentMode: 'UPI',
@@ -117,8 +144,11 @@ describe('JNSD EDUCATION CENTRE SCHOOL ERP - TEST SUITE', () => {
         remarks: 'Test Partial Payment',
       });
 
-      expect(receipt.amount).toBe(paymentAmount);
-      expect(receipt.receiptNo).toMatch(/^REC\/\d{4}\/\d{3}$/);
+      expect(res.status).toBe('CONFIRMED');
+      if (res.status === 'CONFIRMED') {
+        expect(res.receipt.amount).toBe(paymentAmount);
+        expect(res.receipt.receiptNo).toMatch(/^REC\/\d{4}\/\d{3}$/);
+      }
 
       const invoicesAfter = db.getFeeInvoices(managerUser);
       const updated = invoicesAfter.find((inv) => inv.id === targetInvoice.id)!;

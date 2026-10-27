@@ -183,8 +183,32 @@ export interface PaymentReceipt {
   transactionRef?: string;
   paymentDate: string;
   receivedBy: string;
+  approvedBy?: string;
   feeBreakdown: { head: string; amount: number }[];
   remarks?: string;
+}
+
+export type FeeSubmissionStatus = 'PENDING_MANAGER_APPROVAL' | 'APPROVED' | 'REJECTED';
+
+export interface FeeSubmission {
+  id: string;
+  invoiceId: string;
+  studentId: string;
+  studentName: string;
+  admissionNo: string;
+  className: string;
+  amount: number;
+  paymentMode: 'CASH' | 'UPI' | 'BANK_TRANSFER' | 'CHEQUE' | 'NEFT';
+  transactionRef?: string;
+  remarks?: string;
+  submittedBy: string;
+  submittedByRole: UserRole;
+  submittedAt: string;
+  status: FeeSubmissionStatus;
+  approvedBy?: string;
+  approvedAt?: string;
+  rejectionReason?: string;
+  receiptId?: string;
 }
 
 export interface OCRExtractedData {

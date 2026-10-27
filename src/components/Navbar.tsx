@@ -16,8 +16,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenUpdates }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand & Crest */}
         <div className="flex items-center space-x-3">
-          <div className="w-11 h-11 rounded-xl bg-white p-1 shadow-md border border-amber-400/50 flex items-center justify-center shrink-0 ring-2 ring-school-950/20 overflow-hidden">
-            <SchoolLogo className="w-full h-full object-contain" />
+          <div className="h-11 px-2.5 py-1 rounded-xl bg-white shadow-md border border-amber-400/40 flex items-center justify-center shrink-0 ring-1 ring-black/10 overflow-hidden">
+            <img src="/school-logo-exact.png" alt="JNSD School Logo" className="h-9 w-auto object-contain" />
           </div>
           <div>
             <div className="flex items-center space-x-2">
