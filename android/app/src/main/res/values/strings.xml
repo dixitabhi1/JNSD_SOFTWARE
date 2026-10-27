@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">JNSD Education Centre</string>
+    <string name="title_activity_main">JNSD Education Centre</string>
+    <string name="package_name">com.jnsd.schoolerp</string>
+    <string name="custom_url_scheme">com.jnsd.schoolerp</string>
+</resources>
