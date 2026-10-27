@@ -1,0 +1,22 @@
+{
+  "appId": "com.jnsd.schoolerp",
+  "appName": "JNSD Education Centre",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#0f294a",
+      "showSpinner": false,
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP"
+    },
+    "StatusBar": {
+      "backgroundColor": "#0f294a",
+      "style": "DARK"
+    }
+  }
+}
